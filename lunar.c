@@ -110,8 +110,16 @@ static int lunar_fan_read(struct device *dev, enum hwmon_sensor_types type,
 			ec_ram_read(FAN_TACHO_ADDR_L);
 		return 0;
 	case hwmon_pwm:
-		if (attr == hwmon_pwm_enable)
+		if (attr == hwmon_pwm_enable) {
+			uint8_t mode = ec_ram_read(FAN_MODE_ADDR);
+
+			if (mode == FAN_MODE_AUTO)
+				fan->pwm_mode = PWM_AUTO;
+			else
+				fan->pwm_mode = PWM_MANUAL;
+
 			*val = fan->pwm_mode;
+		}
 		else if (attr == hwmon_pwm_input)
 			*val = TO_HWMON(ec_ram_read(FAN_PWM_ADDR));
 		else
